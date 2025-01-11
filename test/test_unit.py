@@ -2,6 +2,7 @@
 
 import subprocess
 import sys
+from pathlib import Path
 from typing import Dict
 
 import pytest
@@ -137,6 +138,24 @@ def test_run_compat() -> None:
         stdout=subprocess.PIPE,
         stderr=subprocess.PIPE,
         universal_newlines=True,
+        check=False,
+    )
+    assert ours.returncode == original.returncode
+    assert ours.stdout == original.stdout
+    assert ours.stderr == original.stderr
+    assert ours.args == original.args
+
+def test_run_compat_not_utf8(tmp_path: Path) -> None:
+    """Assure compatiblity with subprocess.run() when command output is not UTF-8."""
+    script = tmp_path / "script.sh"
+    script_content = 'echo -e "\xC0\x80"'
+    script.write_text(data=script_content, encoding="latin1")
+    cmd = ["bash", str(script)]
+    ours = run(cmd)
+    original = subprocess.run(
+        cmd,
+        stdout=subprocess.PIPE,
+        stderr=subprocess.PIPE,
         check=False,
     )
     assert ours.returncode == original.returncode

@@ -89,7 +89,7 @@ async def _stream_subprocess(
         err: List[str] = []
 
         def tee_func(line: bytes, sink: List[str], pipe: Optional[Any]) -> None:
-            line_str = line.decode("utf-8").rstrip()
+            line_str = line.decode("utf-8", errors="backslashreplace").rstrip()
             sink.append(line_str)
             if not kwargs.get("quiet", False):
                 if pipe and hasattr(pipe, "write"):
